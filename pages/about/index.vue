@@ -4,6 +4,7 @@
     <p>About me About me About me About meAbout me About me About me About me About me About me About me About me About me </p>
     <p>About me About me About me About meAbout me About me About me About me About me About me About me About me About me </p>
     <p>About me About me About me About meAbout me About me About me About me About me About me About me About me About me </p>
+  </div>
 </template>
 
 <style scoped>
