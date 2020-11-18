@@ -28,19 +28,28 @@ module.exports = {
   ** Global CSS
   */
   css: [
+    '~/assets/styles/main.css'
   ],
 
   /*
   ** Plugins to load before mounting the App
   */
   plugins: [
+    '~/plugins/comp.js',
+    '~/plugins/date-filter.js'
   ],
 
   /*
   ** Nuxt.js modules
   */
   modules: [
+    '@nuxtjs/axios',
   ],
+  axios: {
+    baseURL: process.env.BASE_URL || 'https://nuxtblog-8a993.firebaseio.com',
+    credentials:false
+  },
+
 
   /*
   ** Build configuration
@@ -52,5 +61,9 @@ module.exports = {
     extend(config, ctx) {
 
     }
-  }
+  },
+  transition:{
+    name:'fade',
+    mode:'out-in'
+  },
 }

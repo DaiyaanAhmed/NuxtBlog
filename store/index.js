@@ -4,7 +4,8 @@ import axios from "axios";
 const createStore = () => {
   return new Vuex.Store({
     state: {
-      loadedPosts: []
+      loadedPosts: [],
+      token:null
     },
     mutations: {
       setPosts(state, posts) {
@@ -18,6 +19,12 @@ const createStore = () => {
           post => post.id === editedPost.id
         );
         state.loadedPosts[postIndex] = editedPost
+      },
+      setToken(state,token){
+        state.token=token
+      },
+      clearToken(state){
+        state.token=null;
       }
     },
     actions: {
@@ -39,7 +46,7 @@ const createStore = () => {
           updatedDate: new Date()
         }
         return axios
-        .post("https://nuxtblog-8a993.firebaseio.com/posts.json", createdPost)
+        .post("https://nuxtblog-8a993.firebaseio.com/posts.json?auth="+vuexContext.state.token, createdPost)
         .then(result => {
           vuexContext.commit('addPost', {...createdPost, id: result.data.name})
         })
@@ -48,11 +55,35 @@ const createStore = () => {
       editPost(vuexContext, editedPost) {
         return axios.put("https://nuxtblog-8a993.firebaseio.com/posts/" +
           editedPost.id +
-          ".json", editedPost)
+          ".json?auth="+vuexContext.state.token, editedPost)
           .then(res => {
             vuexContext.commit('editPost', editedPost)
           })
           .catch(e => console.log(e))
+      },
+      authenticateUser(vuexContext,authData){
+        let authUrl="https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyB0bKLs5_3B90kMinbqo1EEippJpbUzEZQ"
+        if(authData.isLogin)
+        {
+          authUrl='https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyB0bKLs5_3B90kMinbqo1EEippJpbUzEZQ'
+        }
+        return this.$axios.$post(authUrl,
+        {
+          email:authData.email,
+          password:authData.password,
+          returnSecureToken:true
+        }
+        )
+        .then(result=>{
+          vuexContext.commit("setToken",result.idToken)
+          vuexContext.dispatch("setLogOutTimer",result.expiresIn*1000)
+        })
+        .catch(e=> console.log(e.response.data.error.message))
+      },
+      setLogOutTimer(vuexContext,duration){
+        setTimeout(()=>{
+          vuexContext.commit('clearToken')
+        },duration)
       },
       setPosts(vuexContext, posts) {
         vuexContext.commit("setPosts", posts);
@@ -61,6 +92,9 @@ const createStore = () => {
     getters: {
       loadedPosts(state) {
         return state.loadedPosts;
+      },
+      isAuth(state){
+        return state.token!=null
       }
     }
   });
